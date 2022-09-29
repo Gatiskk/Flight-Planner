@@ -8,17 +8,19 @@ namespace FlightPlanner
 {
     public class FlightStorage
     {
+        private static readonly object _lock = new object();
         private static readonly List<Flight> _flights = new List<Flight>();
         private static int _id = 1;
 
-        public static Flight AddFlight(Flight flight)
-        {
-            flight.Id = _id++;
-            _flights.Add(flight);
-            return flight;
-        }
+            public static Flight AddFlight(Flight flight)
+            {
+                flight.Id = _id++;
+                _flights.Add(flight);
+                return flight;
 
-        public static Flight GetFlight(int id)
+            }
+
+            public static Flight GetFlight(int id)
         {
             return _flights.FirstOrDefault(f => f.Id == id);
         }
@@ -98,13 +100,11 @@ namespace FlightPlanner
 
         public static bool HasSameAirport(Flight flight)
         {
-            if (flight.From.City.ToUpper().Trim() == flight.To.City.ToUpper().Trim() &&
-                flight.From.Country.ToUpper().Trim() == flight.To.Country.ToUpper().Trim() &&
+            if (flight.From.City.ToUpper().Trim() == flight.To.City.ToUpper().Trim() && flight.From.Country.ToUpper().Trim() == flight.To.Country.ToUpper().Trim() &&
                 flight.From.AirportName.ToUpper().Trim() == flight.To.AirportName.ToUpper().Trim())
             {
                 return true;
             }
-
             return false;
         }
 
@@ -125,12 +125,9 @@ namespace FlightPlanner
             }
         }
 
-        public static PageResult SearchFlights(SearchFlight flight)
+        public static PageResult SearchFlights(SearchFlight req)
         {
-            var validFlight = _flights.Where(f => f.From.AirportName == flight.From &&
-                                                  f.To.AirportName == flight.To &&
-                                                  f.DepartureTime == flight.DepartureDate).ToArray();
-            return new PageResult(validFlight);
+            return new PageResult(_flights.ToArray());
         }
 
         public static bool IsValidFormat(SearchFlight request)
