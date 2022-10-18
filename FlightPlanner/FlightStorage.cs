@@ -1,68 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 
 namespace FlightPlanner
 {
     public class FlightStorage
     {
-        private static readonly object _lock = new object();
-        private static readonly List<Flight> _flights = new List<Flight>();
-        private static int _id = 1;
-
-            public static Flight AddFlight(Flight flight)
-            {
-                flight.Id = _id++;
-                _flights.Add(flight);
-                return flight;
-
-            }
-
-            public static Flight GetFlight(int id)
-        {
-            return _flights.FirstOrDefault(f => f.Id == id);
-        }
-
-        public static void Clear()
-        {
-            _flights.Clear();
-            _id = 0;
-        }
-
-        public static bool CheckFlightAndAirport(Flight flight)
-        {
-            if (_flights.Count == 0)
-            {
-                return false;
-            }
-
-            foreach (Flight itemFlight in _flights)
-            {
-                if (itemFlight.Equals(flight))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return false;
-        }
-
-        public static void FlightDelete(int id)
-        {
-            var flight = GetFlight(id);
-
-            if (flight != null)
-            {
-                _flights.Remove(flight);
-            }
-        }
-
         public static bool ValidFormat(Flight flight)
         {
 
@@ -108,28 +50,6 @@ namespace FlightPlanner
             return false;
         }
 
-        public static Airport[] FindAirports(string phrase)
-        {
-            {
-                phrase = phrase.ToLower().Trim();
-                var fromAirports = _flights.Where(f => f.From.AirportName.ToLower().Trim().Contains(phrase)
-                                                       || f.From.City.ToLower().Trim().Contains(phrase)
-                                                       || f.From.Country.ToLower().Trim().Contains(phrase))
-                    .Select(a => a.From).ToArray();
-                var toAirports = _flights.Where(f => f.To.AirportName.ToLower().Trim().Contains(phrase)
-                                                     || f.To.City.ToLower().Trim().Contains(phrase)
-                                                     || f.To.Country.ToLower().Trim().Contains(phrase))
-                    .Select(f => f.To).ToArray();
-
-                return fromAirports.Concat(toAirports).ToArray();
-            }
-        }
-
-        public static PageResult SearchFlights(SearchFlight req)
-        {
-            return new PageResult(_flights.ToArray());
-        }
-
         public static bool IsValidFormat(SearchFlight request)
         {
             if (request.From == request.To)
@@ -137,12 +57,7 @@ namespace FlightPlanner
                 return false;
             }
 
-            if (request.To == null || request.From == null || request.DepartureDate == null)
-            {
-                return false;
-            }
-
-            return true;
+            return request.To != null && request.From != null && request.DepartureDate != null;
         }
     }
 }
