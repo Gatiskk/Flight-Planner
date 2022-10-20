@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FlightPlanner.Data;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FlightPlanner.Controllers
 {
@@ -6,8 +7,8 @@ namespace FlightPlanner.Controllers
     [ApiController]
     public class TestingApiController : ControllerBase
     {
-        private readonly FlightPlannerDBContext _dbContext;
-        public TestingApiController(FlightPlannerDBContext context)
+        private readonly FlightPlannerDbContext _dbContext;
+        public TestingApiController(FlightPlannerDbContext context)
         {
             _dbContext = context;
         }

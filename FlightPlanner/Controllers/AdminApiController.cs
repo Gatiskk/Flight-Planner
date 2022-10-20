@@ -1,8 +1,13 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using AutoMapper;
+using FlightPlanner.Core.Models;
+using FlightPlanner.Core.Services;
+using FlightPlanner.Core.Validations;
+using FlightPlanner.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using SearchFlightRequest = FlightPlanner.Core.Models.SearchFlightRequest;
 
 namespace FlightPlanner.Controllers
 {
@@ -10,86 +15,80 @@ namespace FlightPlanner.Controllers
     [ApiController, Authorize]
     public class AdminApiController : ControllerBase
     {
-        private static readonly object _locker = new object();
-        private readonly FlightPlannerDBContext _dbContext;
-        public AdminApiController(FlightPlannerDBContext context)
+        private readonly IFlightService _flightService;
+        private readonly IEnumerable<IFlightValidator> _flightValidators;
+        private readonly IEnumerable<IAirportValidator> _airportValidators;
+        private readonly IMapper _mapper;
+        private static readonly object _lock = new object();
+        public AdminApiController(IFlightService flightService, 
+            IEnumerable<IFlightValidator> flightValidators,
+            IEnumerable<IAirportValidator> airportValidators,
+            IMapper mapper)
         {
-            _dbContext = context;
+            _flightService = flightService;
+            _airportValidators = airportValidators;
+            _flightValidators = flightValidators;
+            _mapper = mapper;
         }
 
         [Route("flights/{id}")]
         [HttpGet]
         public IActionResult GetFlight(int id)
         {
-            lock (_locker)
+            lock (_lock)
             {
-                var flight = _dbContext.Flights
-                    .Include(f => f.From)
-                    .Include(f => f.To)
-                    .FirstOrDefault(f => f.Id == id);
+                var flight = _flightService.GetCompleteFlightById(id);
+
                 if (flight == null)
                 {
                     return NotFound();
                 }
-                return Ok(flight);
+
+                var response = _mapper.Map<SearchFlightRequest>(flight);
+                return Ok(response);
             }
-            
         }
 
         [Route("flights")]
         [HttpPut]
-        public IActionResult PutFlight(Flight flight)
+        public IActionResult PutFlight(FlightRequest request)
         {
-            lock (_locker)
+            lock (_lock)
             {
-                if (flight == null)
-                {
-                    return NoContent();
-                }
-
-                if (!FlightStorage.ValidFormat(flight))
+                var flight = _mapper.Map<Flight>(request);
+                if (!_flightValidators.All(f => f.IsValid(flight)) ||
+                    !_airportValidators.All(f => f.IsValid(flight?.From)) ||
+                    !_airportValidators.All(f => f.IsValid(flight?.To)))
                 {
                     return BadRequest();
                 }
 
-                if (FlightStorage.HasSameAirport(flight))
-                {
-                    return BadRequest();
-                }
-
-                if (_dbContext.Flights.Any(f => f.From.AirportName == flight.From.AirportName &&
-                                                f.From.City == flight.From.City &&
-                                                f.From.Country == flight.From.Country &&
-                                                f.To.AirportName == flight.To.AirportName &&
-                                                f.To.City == flight.To.City && f.To.Country == flight.To.Country &&
-                                                f.ArrivalTime == flight.ArrivalTime && f.Carrier == flight.Carrier &&
-                                                f.DepartureTime == flight.DepartureTime))
+                if (_flightService.Exists(flight))
                 {
                     return Conflict();
                 }
 
-                _dbContext.Flights.Add(flight);
-                _dbContext.SaveChanges();
-                return Created("", flight);
+                _flightService.Create(flight);
+                request = _mapper.Map<FlightRequest>(flight);
+                return Created("", request);
             }
-        }
             
-
+        }
+        
         [Route("flights/{id}")]
         [HttpDelete]
         public IActionResult FlightDelete(int id)
         {
-            lock (_locker)
+            lock (_lock)
             {
-                var flight = _dbContext.Flights
-                    .Include(f => f.From)
-                    .Include(f => f.To)
-                    .SingleOrDefault(f => f.Id == id);
-                if (flight == null) return Ok();
-                _dbContext.Flights.Remove(flight);
-                _dbContext.SaveChanges();
+                var flight = _flightService.GetById(id);
+                if (flight != null)
+                {
+                    _flightService.Delete(flight);
+                }
                 return Ok();
             }
+            
         }
     }
 }

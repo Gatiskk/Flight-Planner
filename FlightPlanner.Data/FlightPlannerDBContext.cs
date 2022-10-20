@@ -1,9 +1,10 @@
-﻿using FlightPlanner.Core.Models;
+﻿using System.Threading.Tasks;
+using FlightPlanner.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlightPlanner.Data
 {
-    public class FlightPlannerDbContext : DbContext
+    public class FlightPlannerDbContext : DbContext, IFlightPlannerDbContext
     {
         public FlightPlannerDbContext(DbContextOptions options): base (options)
         {
@@ -12,5 +13,9 @@ namespace FlightPlanner.Data
 
         public DbSet<Flight> Flights { get; set; }
         public DbSet<Airport> Airports { get; set; }
+        public Task<int> SaveChangesAsync()
+        {
+            return base.SaveChangesAsync();
+        }
     }
 }

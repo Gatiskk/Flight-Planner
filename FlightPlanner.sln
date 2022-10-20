@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightPlanner.Core", "Fligh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightPlanner.Data", "FlightPlanner.Data\FlightPlanner.Data.csproj", "{EA5B062B-8490-4356-8117-894ECD69A11E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FlightPlanner.Services", "FlightPlanner.Services\FlightPlanner.Services.csproj", "{6B28B770-5E9D-4B79-A72E-2DA09D965630}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{EA5B062B-8490-4356-8117-894ECD69A11E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA5B062B-8490-4356-8117-894ECD69A11E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA5B062B-8490-4356-8117-894ECD69A11E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B28B770-5E9D-4B79-A72E-2DA09D965630}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B28B770-5E9D-4B79-A72E-2DA09D965630}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B28B770-5E9D-4B79-A72E-2DA09D965630}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B28B770-5E9D-4B79-A72E-2DA09D965630}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
